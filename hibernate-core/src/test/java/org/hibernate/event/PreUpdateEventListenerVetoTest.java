@@ -1,26 +1,31 @@
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
+ */
 package org.hibernate.event;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Version;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Version;
 
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 
-import org.hibernate.testing.TestForIssue;
-import org.hibernate.testing.junit4.BaseCoreFunctionalTestCase;
-import org.junit.Before;
-import org.junit.Test;
+import org.hibernate.testing.orm.junit.JiraKey;
+import org.hibernate.testing.orm.junit.BaseSessionFactoryFunctionalTest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.hibernate.testing.transaction.TransactionUtil.doInHibernate;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 /**
  * @author Nathan Xu
  * @author Tassilo Karge
  */
-@TestForIssue( jiraKey = "HHH-14413" )
-public class PreUpdateEventListenerVetoTest extends BaseCoreFunctionalTestCase {
+@JiraKey(value = "HHH-14413")
+public class PreUpdateEventListenerVetoTest extends BaseSessionFactoryFunctionalTest {
 
 	private static final Long EXAMPLE_ID_VALUE = 1L;
 
@@ -30,33 +35,29 @@ public class PreUpdateEventListenerVetoTest extends BaseCoreFunctionalTestCase {
 	}
 
 	@Override
-	protected void afterSessionFactoryBuilt() {
-		super.afterSessionFactoryBuilt();
-		EventListenerRegistry registry = sessionFactory().getServiceRegistry().getService( EventListenerRegistry.class );
-		registry.appendListeners(
-				EventType.PRE_UPDATE,
-				event -> true
-		);
+	protected void sessionFactoryBuilt(SessionFactoryImplementor factory) {
+		factory.getServiceRegistry().requireService( EventListenerRegistry.class )
+				.appendListeners( EventType.PRE_UPDATE, event -> true );
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
-		doInHibernate( this::sessionFactory, session -> {
+		inTransaction( session -> {
 			ExampleEntity entity = new ExampleEntity();
 			entity.id = EXAMPLE_ID_VALUE;
 			entity.name = "old_name";
-			session.save( entity );
+			session.persist( entity );
 		} );
 	}
 
 	@Test
 	public void testVersionNotChangedWhenPreUpdateEventVetoed() {
 
-		doInHibernate( this::sessionFactory, session -> {
+		inTransaction( session -> {
 			ExampleEntity entity = session.byId( ExampleEntity.class ).load( EXAMPLE_ID_VALUE );
 
 			entity.name = "new_name";
-			session.update( entity );
+			entity = session.merge( entity );
 
 			final Long versionBeforeFlush = entity.version;
 
@@ -64,7 +65,11 @@ public class PreUpdateEventListenerVetoTest extends BaseCoreFunctionalTestCase {
 
 			final Long versionAfterFlush = entity.version;
 
-			assertEquals( "The entity version must not change when update is vetoed", versionBeforeFlush, versionAfterFlush );
+			assertEquals(
+					versionBeforeFlush,
+					versionAfterFlush,
+					"The entity version must not change when update is vetoed"
+			);
 
 		} );
 	}

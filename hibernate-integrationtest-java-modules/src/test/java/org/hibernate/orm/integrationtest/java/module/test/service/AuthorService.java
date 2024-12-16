@@ -1,14 +1,12 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.orm.integrationtest.java.module.test.service;
 
 import java.util.List;
 
-import javax.persistence.Persistence;
+import jakarta.persistence.Persistence;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -36,7 +34,7 @@ public class AuthorService implements AutoCloseable {
 				Author entity = new Author();
 				entity.setName( name );
 				entity.setFavoriteNumber( favoriteNumber );
-				session.save( entity );
+				session.persist( entity );
 				session.getTransaction().commit();
 			}
 			catch (Throwable e) {

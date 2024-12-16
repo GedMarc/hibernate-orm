@@ -1,15 +1,13 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.engine.jdbc.env.internal;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.cfg.AvailableSettings;
@@ -19,7 +17,8 @@ import org.hibernate.dialect.H2Dialect;
 import org.hibernate.id.SequenceMismatchStrategy;
 import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;
 
-import org.hibernate.testing.TestForIssue;
+import org.hibernate.testing.RequiresDialect;
+import org.hibernate.testing.orm.junit.JiraKey;
 import org.hibernate.testing.junit4.BaseCoreFunctionalTestCase;
 import org.junit.Test;
 
@@ -27,13 +26,14 @@ import org.junit.Test;
  * Verifies that setting {@code AvailableSettings.SEQUENCE_INCREMENT_SIZE_MISMATCH_STRATEGY} to {@code none}
  * is going to skip loading the sequence information from the database.
  */
-@TestForIssue( jiraKey = "HHH-14667")
+@RequiresDialect( H2Dialect.class )
+@JiraKey( value = "HHH-14667")
 public class SkipLoadingSequenceInformationTest extends BaseCoreFunctionalTestCase {
 
 	@Override
 	protected void configure(Configuration configuration) {
-		configuration.setProperty( AvailableSettings.SEQUENCE_INCREMENT_SIZE_MISMATCH_STRATEGY, SequenceMismatchStrategy.NONE.name() );
-		configuration.setProperty( Environment.DIALECT, VetoingDialect.class.getName() );
+		configuration.setProperty( AvailableSettings.SEQUENCE_INCREMENT_SIZE_MISMATCH_STRATEGY, SequenceMismatchStrategy.NONE );
+		configuration.setProperty( Environment.DIALECT, VetoingDialect.class );
 	}
 
 	@Entity(name="seqentity")

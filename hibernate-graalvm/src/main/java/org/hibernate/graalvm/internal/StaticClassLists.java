@@ -1,19 +1,18 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.graalvm.internal;
 
-import org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor;
+
+import org.hibernate.tool.schema.internal.script.MultiLineSqlScriptExtractor;
 import org.hibernate.type.EnumType;
 
 /**
  * The place to list all "static" types we know of that need to be possible to
  * construct at runtime via reflection.
- * This is useful for GraalVM native images - but is not intenteded to be an
- * exhaustive list: take these as an helpful starting point.
+ * This is useful for GraalVM native images - but is not intended to be an
+ * exhaustive list: take these as a helpful starting point.
  */
 final class StaticClassLists {
 
@@ -22,15 +21,11 @@ final class StaticClassLists {
 				//The CoreMessageLogger is sometimes looked up without it necessarily being a field, so we're
 				//not processing it the same way as other Logger lookups.
 				org.hibernate.internal.CoreMessageLogger_$logger.class,
-				org.hibernate.tuple.component.PojoComponentTuplizer.class,
-				org.hibernate.tuple.component.DynamicMapComponentTuplizer.class,
-				org.hibernate.tuple.entity.DynamicMapEntityTuplizer.class,
 				org.hibernate.persister.collection.OneToManyPersister.class,
 				org.hibernate.persister.collection.BasicCollectionPersister.class,
 				org.hibernate.persister.entity.JoinedSubclassEntityPersister.class,
 				org.hibernate.persister.entity.UnionSubclassEntityPersister.class,
 				org.hibernate.persister.entity.SingleTableEntityPersister.class,
-				org.hibernate.tuple.entity.PojoEntityTuplizer.class,
 		};
 	}
 
@@ -42,7 +37,8 @@ final class StaticClassLists {
 				org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl.class,
 				org.hibernate.resource.transaction.backend.jta.internal.JtaTransactionCoordinatorBuilderImpl.class,
 				EnumType.class,
-				MultipleLinesSqlCommandExtractor.class,
+				MultiLineSqlScriptExtractor.class,
+
 		};
 	}
 
@@ -53,7 +49,6 @@ final class StaticClassLists {
 				org.hibernate.event.spi.LoadEventListener[].class,
 				org.hibernate.event.spi.ResolveNaturalIdEventListener[].class,
 				org.hibernate.event.spi.InitializeCollectionEventListener[].class,
-				org.hibernate.event.spi.SaveOrUpdateEventListener[].class,
 				org.hibernate.event.spi.PersistEventListener[].class,
 				org.hibernate.event.spi.MergeEventListener[].class,
 				org.hibernate.event.spi.DeleteEventListener[].class,
@@ -69,17 +64,19 @@ final class StaticClassLists {
 				org.hibernate.event.spi.PreLoadEventListener[].class,
 				org.hibernate.event.spi.PreDeleteEventListener[].class,
 				org.hibernate.event.spi.PreUpdateEventListener[].class,
+				org.hibernate.event.spi.PreUpsertEventListener[].class,
 				org.hibernate.event.spi.PreInsertEventListener[].class,
 				org.hibernate.event.spi.PostLoadEventListener[].class,
 				org.hibernate.event.spi.PostDeleteEventListener[].class,
 				org.hibernate.event.spi.PostUpdateEventListener[].class,
+				org.hibernate.event.spi.PostUpsertEventListener[].class,
 				org.hibernate.event.spi.PostInsertEventListener[].class,
 				org.hibernate.event.spi.PreCollectionRecreateEventListener[].class,
 				org.hibernate.event.spi.PreCollectionRemoveEventListener[].class,
 				org.hibernate.event.spi.PreCollectionUpdateEventListener[].class,
 				org.hibernate.event.spi.PostCollectionRecreateEventListener[].class,
 				org.hibernate.event.spi.PostCollectionRemoveEventListener[].class,
-				org.hibernate.event.spi.PostCollectionUpdateEventListener[].class
+				org.hibernate.event.spi.PostCollectionUpdateEventListener[].class,
 		};
 	}
 

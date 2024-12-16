@@ -1,8 +1,6 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.bytecode.enhance.spi.interceptor;
 
@@ -283,9 +281,8 @@ public class EnhancementHelper {
 			throwLazyInitializationException( Cause.NO_SF_UUID, entityName, attributeName );
 		}
 
-		final SessionFactoryImplementor sf = (SessionFactoryImplementor)
-				SessionFactoryRegistry.INSTANCE.getSessionFactory( interceptor.getSessionFactoryUuid() );
-		final SharedSessionContractImplementor session = (SharedSessionContractImplementor) sf.openSession();
+		final SessionFactoryImplementor sf = SessionFactoryRegistry.INSTANCE.getSessionFactory( interceptor.getSessionFactoryUuid() );
+		final SharedSessionContractImplementor session = sf.openSession();
 		session.getPersistenceContextInternal().setDefaultReadOnly( true );
 		session.setHibernateFlushMode( FlushMode.MANUAL );
 		return session;

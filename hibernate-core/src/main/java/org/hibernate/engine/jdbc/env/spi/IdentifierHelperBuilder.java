@@ -1,26 +1,27 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.engine.jdbc.env.spi;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.hibernate.engine.jdbc.env.internal.NormalizingIdentifierHelperImpl;
-import org.hibernate.internal.util.StringHelper;
 import org.hibernate.internal.util.collections.ArrayHelper;
 
 import org.jboss.logging.Logger;
 
+import static java.util.Collections.addAll;
+import static org.hibernate.internal.util.StringHelper.splitAtCommas;
+
 /**
- * Builder for IdentifierHelper instances.  Mainly here to allow progressive
- * building of the immutable (after instantiation) IdentifierHelper.
+ * Builder for {@link IdentifierHelper} instances.  Mainly here to allow progressive
+ * building of the immutable (after instantiation) {@link IdentifierHelper}.
  *
  * @author Steve Ebersole
  */
@@ -38,6 +39,8 @@ public class IdentifierHelperBuilder {
 	private boolean globallyQuoteIdentifiers = false;
 	private boolean skipGlobalQuotingForColumnDefinitions = false;
 	private boolean autoQuoteKeywords = true;
+	private boolean autoQuoteInitialUnderscore = false;
+	private boolean autoQuoteDollar = false;
 	private IdentifierCaseStrategy unquotedCaseStrategy = IdentifierCaseStrategy.UPPER;
 	private IdentifierCaseStrategy quotedCaseStrategy = IdentifierCaseStrategy.MIXED;
 
@@ -57,19 +60,12 @@ public class IdentifierHelperBuilder {
 	 * @throws SQLException Any access to DatabaseMetaData can case SQLException; just re-throw.
 	 */
 	public void applyReservedWords(DatabaseMetaData metaData) throws SQLException {
-		if ( metaData == null ) {
-			return;
+		if ( metaData != null
+				// Important optimisation: skip loading all keywords
+				// from the DB when autoQuoteKeywords is disabled
+				&& autoQuoteKeywords ) {
+			addAll( reservedWords, splitAtCommas( metaData.getSQLKeywords() ) );
 		}
-
-		//Important optimisation: skip loading all keywords from the DB when autoQuoteKeywords is disabled
-		if ( autoQuoteKeywords == false ) {
-			return;
-		}
-		this.reservedWords.addAll( parseKeywords( metaData.getSQLKeywords() ) );
-	}
-
-	private static List<String> parseKeywords(String extraKeywordsString) {
-		return StringHelper.parseCommaSeparatedString( extraKeywordsString );
 	}
 
 	public void applyIdentifierCasing(DatabaseMetaData metaData) throws SQLException {
@@ -93,13 +89,13 @@ public class IdentifierHelperBuilder {
 			}
 
 			if ( metaData.storesUpperCaseIdentifiers() ) {
-				this.unquotedCaseStrategy = IdentifierCaseStrategy.UPPER;
+				unquotedCaseStrategy = IdentifierCaseStrategy.UPPER;
 			}
 			else if ( metaData.storesLowerCaseIdentifiers() ) {
-				this.unquotedCaseStrategy = IdentifierCaseStrategy.LOWER;
+				unquotedCaseStrategy = IdentifierCaseStrategy.LOWER;
 			}
 			else {
-				this.unquotedCaseStrategy = IdentifierCaseStrategy.MIXED;
+				unquotedCaseStrategy = IdentifierCaseStrategy.MIXED;
 			}
 		}
 
@@ -120,13 +116,13 @@ public class IdentifierHelperBuilder {
 			}
 
 			if ( metaData.storesMixedCaseQuotedIdentifiers() ) {
-				this.quotedCaseStrategy = IdentifierCaseStrategy.MIXED;
+				quotedCaseStrategy = IdentifierCaseStrategy.MIXED;
 			}
 			else if ( metaData.storesLowerCaseQuotedIdentifiers() ) {
-				this.quotedCaseStrategy = IdentifierCaseStrategy.LOWER;
+				quotedCaseStrategy = IdentifierCaseStrategy.LOWER;
 			}
 			else {
-				this.quotedCaseStrategy = IdentifierCaseStrategy.UPPER;
+				quotedCaseStrategy = IdentifierCaseStrategy.UPPER;
 			}
 		}
 	}
@@ -149,6 +145,14 @@ public class IdentifierHelperBuilder {
 
 	public void setAutoQuoteKeywords(boolean autoQuoteKeywords) {
 		this.autoQuoteKeywords = autoQuoteKeywords;
+	}
+
+	public void setAutoQuoteInitialUnderscore(boolean autoQuoteInitialUnderscore) {
+		this.autoQuoteInitialUnderscore = autoQuoteInitialUnderscore;
+	}
+
+	public void setAutoQuoteDollar(boolean autoQuoteDollar) {
+		this.autoQuoteDollar = autoQuoteDollar;
 	}
 
 	public NameQualifierSupport getNameQualifierSupport() {
@@ -179,12 +183,19 @@ public class IdentifierHelperBuilder {
 		this.reservedWords.clear();
 	}
 
-	public void applyReservedWords(Set<String> words) {
+	public void applyReservedWords(String... words) {
+		applyReservedWords( Arrays.asList( words ) );
+	}
+
+	public void applyReservedWords(Collection<String> words) {
 		//No use when autoQuoteKeywords is disabled
-		if ( autoQuoteKeywords == false ) {
-			return;
+		if ( autoQuoteKeywords ) {
+			reservedWords.addAll( words );
 		}
-		this.reservedWords.addAll( words );
+	}
+
+	public void applyReservedWords(Set<String> words) {
+		applyReservedWords( (Collection<String>) words );
 	}
 
 	public void setReservedWords(Set<String> words) {
@@ -208,6 +219,8 @@ public class IdentifierHelperBuilder {
 				globallyQuoteIdentifiers,
 				skipGlobalQuotingForColumnDefinitions,
 				autoQuoteKeywords,
+				autoQuoteInitialUnderscore,
+				autoQuoteDollar,
 				reservedWords,
 				unquotedCaseStrategy,
 				quotedCaseStrategy

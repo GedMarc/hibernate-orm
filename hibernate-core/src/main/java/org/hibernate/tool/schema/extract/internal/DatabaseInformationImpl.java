@@ -1,8 +1,6 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.tool.schema.extract.internal;
 
@@ -14,6 +12,7 @@ import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.relational.Namespace;
 import org.hibernate.boot.model.relational.QualifiedSequenceName;
 import org.hibernate.boot.model.relational.QualifiedTableName;
+import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.hibernate.resource.transaction.spi.DdlTransactionIsolator;
 import org.hibernate.service.ServiceRegistry;
@@ -31,6 +30,7 @@ import org.hibernate.tool.schema.spi.SchemaManagementTool;
 public class DatabaseInformationImpl
 		implements DatabaseInformation, ExtractionContext.DatabaseObjectAccess {
 	private final JdbcEnvironment jdbcEnvironment;
+	private final SqlStringGenerationContext context;
 	private final ExtractionContext extractionContext;
 	private final InformationExtractor extractor;
 
@@ -39,16 +39,16 @@ public class DatabaseInformationImpl
 	public DatabaseInformationImpl(
 			ServiceRegistry serviceRegistry,
 			JdbcEnvironment jdbcEnvironment,
+			SqlStringGenerationContext context,
 			DdlTransactionIsolator ddlTransactionIsolator,
-			Namespace.Name defaultNamespace,
 			SchemaManagementTool tool) throws SQLException {
 		this.jdbcEnvironment = jdbcEnvironment;
+		this.context = context;
 		this.extractionContext = tool.getExtractionTool().createExtractionContext(
 				serviceRegistry,
 				jdbcEnvironment,
+				context,
 				ddlTransactionIsolator,
-				defaultNamespace.getCatalog(),
-				defaultNamespace.getSchema(),
 				this
 		);
 
@@ -78,12 +78,13 @@ public class DatabaseInformationImpl
 
 	@Override
 	public boolean catalogExists(Identifier catalog) {
-		return extractor.catalogExists( catalog );
+		return extractor.catalogExists( context.catalogWithDefault( catalog ) );
 	}
 
 	@Override
 	public boolean schemaExists(Namespace.Name namespace) {
-		return extractor.schemaExists( namespace.getCatalog(), namespace.getSchema() );
+		return extractor.schemaExists( context.catalogWithDefault( namespace.getCatalog() ),
+				context.schemaWithDefault( namespace.getSchema() ) );
 	}
 
 	@Override
@@ -108,15 +109,16 @@ public class DatabaseInformationImpl
 		}
 
 		return extractor.getTable(
-				tableName.getCatalogName(),
-				tableName.getSchemaName(),
+				context.catalogWithDefault( tableName.getCatalogName() ),
+				context.schemaWithDefault( tableName.getSchemaName() ),
 				tableName.getTableName()
 		);
 	}
 
 	@Override
 	public NameSpaceTablesInformation getTablesInformation(Namespace namespace) {
-		return extractor.getTables( namespace.getPhysicalName().getCatalog(), namespace.getPhysicalName().getSchema() );
+		return extractor.getTables( context.catalogWithDefault( namespace.getPhysicalName().getCatalog() ),
+				context.schemaWithDefault( namespace.getPhysicalName().getSchema() ) );
 	}
 
 	@Override

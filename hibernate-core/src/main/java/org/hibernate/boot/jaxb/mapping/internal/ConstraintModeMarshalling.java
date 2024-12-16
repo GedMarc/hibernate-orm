@@ -1,24 +1,22 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.boot.jaxb.mapping.internal;
 
-import javax.persistence.ConstraintMode;
+import jakarta.persistence.ConstraintMode;
 
 /**
- * Marshalling support for dealing with JPA ConstraintMode enums.  Plugged into JAXB for binding
+ * JAXB marshalling for JPA's {@link ConstraintMode}
  *
  * @author Steve Ebersole
  */
 public class ConstraintModeMarshalling {
 	public static ConstraintMode fromXml(String name) {
-		return ConstraintMode.valueOf( name );
+		return name == null ? null : ConstraintMode.valueOf( name );
 	}
 
-	public static String toXml(ConstraintMode accessType) {
-		return accessType.name();
+	public static String toXml(ConstraintMode constraintMode) {
+		return constraintMode == null ? null : constraintMode.name();
 	}
 }

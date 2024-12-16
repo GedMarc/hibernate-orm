@@ -1,8 +1,6 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.tool.schema.extract.spi;
 
@@ -16,6 +14,7 @@ import org.hibernate.Incubating;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.relational.QualifiedSequenceName;
 import org.hibernate.boot.model.relational.QualifiedTableName;
+import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.hibernate.service.ServiceRegistry;
 
@@ -30,6 +29,7 @@ import org.hibernate.service.ServiceRegistry;
 public interface ExtractionContext {
 	ServiceRegistry getServiceRegistry();
 	JdbcEnvironment getJdbcEnvironment();
+	SqlStringGenerationContext getSqlStringGenerationContext();
 	Connection getJdbcConnection();
 	DatabaseMetaData getJdbcDatabaseMetaData();
 
@@ -80,6 +80,11 @@ public interface ExtractionContext {
 
 		@Override
 		public JdbcEnvironment getJdbcEnvironment() {
+			return null;
+		}
+
+		@Override
+		public SqlStringGenerationContext getSqlStringGenerationContext() {
 			return null;
 		}
 

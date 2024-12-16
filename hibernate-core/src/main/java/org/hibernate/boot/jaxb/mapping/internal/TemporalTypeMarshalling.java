@@ -1,24 +1,22 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.boot.jaxb.mapping.internal;
 
-import javax.persistence.TemporalType;
+import jakarta.persistence.TemporalType;
 
 /**
- * Marshalling support for dealing with JPA TemporalType enums.  Plugged into JAXB for binding
+ * JAXB marshalling for {@link TemporalType}
  *
  * @author Steve Ebersole
  */
 public class TemporalTypeMarshalling {
 	public static TemporalType fromXml(String name) {
-		return TemporalType.valueOf( name );
+		return name == null ? null : TemporalType.valueOf( name );
 	}
 
 	public static String toXml(TemporalType temporalType) {
-		return temporalType.name();
+		return temporalType == null ? null : temporalType.name();
 	}
 }

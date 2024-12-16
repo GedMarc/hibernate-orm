@@ -1,18 +1,16 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.test.stat;
 
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Cacheable;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
@@ -64,7 +62,7 @@ public class MicrometerCacheStatisticsTest extends BaseNonConfigCoreFunctionalTe
 	}
 
 	@Override
-	protected void addSettings(Map settings) {
+	protected void addSettings(Map<String,Object> settings) {
 		super.addSettings( settings );
 		settings.put( AvailableSettings.USE_SECOND_LEVEL_CACHE, "true" );
 		settings.put( AvailableSettings.USE_QUERY_CACHE, "true" );
@@ -113,6 +111,7 @@ public class MicrometerCacheStatisticsTest extends BaseNonConfigCoreFunctionalTe
 		Assert.assertNotNull(registry.get("hibernate.entities.inserts").functionCounter());
 		Assert.assertNotNull(registry.get("hibernate.entities.loads").functionCounter());
 		Assert.assertNotNull(registry.get("hibernate.entities.updates").functionCounter());
+		Assert.assertNotNull(registry.get("hibernate.entities.upserts").functionCounter());
 
 		Assert.assertNotNull(registry.get("hibernate.collections.deletes").functionCounter());
 		Assert.assertNotNull(registry.get("hibernate.collections.fetches").functionCounter());
@@ -144,7 +143,7 @@ public class MicrometerCacheStatisticsTest extends BaseNonConfigCoreFunctionalTe
 		Session session = openSession();
 		session.beginTransaction();
 		Person person = new Person( 1, "testAcct");
-		session.save( person );
+		session.persist( person );
 		session.getTransaction().commit();
 		session.close();
 
@@ -171,7 +170,7 @@ public class MicrometerCacheStatisticsTest extends BaseNonConfigCoreFunctionalTe
 		// clean up
 		session = openSession();
 		session.beginTransaction();
-		session.delete( person );
+		session.remove( person );
 		session.getTransaction().commit();
 		session.close();
 

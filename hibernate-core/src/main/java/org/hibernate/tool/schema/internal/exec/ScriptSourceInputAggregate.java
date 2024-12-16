@@ -1,16 +1,19 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.tool.schema.internal.exec;
 
+import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
-import org.hibernate.tool.hbm2ddl.ImportSqlCommandExtractor;
+import org.hibernate.internal.CoreLogging;
+import org.hibernate.internal.CoreMessageLogger;
+import org.hibernate.tool.schema.internal.SchemaCreatorImpl;
 import org.hibernate.tool.schema.spi.ScriptSourceInput;
 
 /**
@@ -20,64 +23,54 @@ import org.hibernate.tool.schema.spi.ScriptSourceInput;
  */
 public class ScriptSourceInputAggregate implements ScriptSourceInput {
 
-	private final ScriptSourceInput[] inputs;
+	private static final CoreMessageLogger log = CoreLogging.messageLogger( SchemaCreatorImpl.class );
+
+	private final AbstractScriptSourceInput[] inputs;
 
 	/**
 	 * Constructs a ScriptSourceInputAggregate
 	 *
 	 * @param inputs The script source inputs
 	 */
-	public ScriptSourceInputAggregate(ScriptSourceInput[] inputs) {
+	public ScriptSourceInputAggregate(AbstractScriptSourceInput[] inputs) {
 		this.inputs = inputs;
 	}
 
 	@Override
-	public void prepare() {
-		for ( ScriptSourceInput input : inputs ) {
-			input.prepare();
-		}
-	}
+	public List<String> extract(Function<Reader, List<String>> extractor) {
 
-	@Override
-	public void release() {
-		Throwable t = null;
-		for ( ScriptSourceInput input : inputs ) {
-			try {
-				input.release();
-			}
-			catch (Throwable t2) {
-				if ( t == null ) {
-					t = t2;
-				}
-				else {
-					t.addSuppressed( t2 );
-				}
-			}
-		}
-		if ( t != null ) {
-			doThrow( t );
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends Throwable> void doThrow(Throwable e) throws T {
-		throw (T) e;
-	}
-
-	@Override
-	public List<String> read(ImportSqlCommandExtractor commandExtractor) {
 		final List<String>[] lists = new List[inputs.length];
 		int size = 0;
 		for ( int i = 0; i < inputs.length; i++ ) {
-			lists[i] = inputs[i].read( commandExtractor );
-			size += lists[i].size();
+			final AbstractScriptSourceInput scriptSourceInput = inputs[i];
+			if ( scriptSourceInput.exists() ) {
+				final Reader reader = scriptSourceInput.prepareReader();
+				try {
+					log.executingScript( scriptSourceInput.getScriptDescription() );
+					lists[i] = extractor.apply( reader );
+					size += lists[i].size();
+				}
+				finally {
+					scriptSourceInput.releaseReader( reader );
+				}
+			}
 		}
-
 		final List<String> list = new ArrayList<>( size );
 		for ( List<String> strings : lists ) {
 			list.addAll( strings );
 		}
+
 		return list;
+	}
+
+	@Override
+	public boolean containsScript(URL url) {
+		for ( int i = 0; i < inputs.length; i++ ) {
+			if ( inputs[i].containsScript( url ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

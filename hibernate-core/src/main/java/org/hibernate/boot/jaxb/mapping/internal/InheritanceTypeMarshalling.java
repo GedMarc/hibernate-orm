@@ -1,24 +1,22 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.boot.jaxb.mapping.internal;
 
-import javax.persistence.InheritanceType;
+import jakarta.persistence.InheritanceType;
 
 /**
- * Marshalling support for dealing with JPA InheritanceType enums.  Plugged into JAXB for binding
+ * JAXB marshalling for {@link InheritanceType}
  *
  * @author Steve Ebersole
  */
 public class InheritanceTypeMarshalling {
 	public static InheritanceType fromXml(String name) {
-		return InheritanceType.valueOf( name );
+		return name == null ? null : InheritanceType.valueOf( name );
 	}
 
-	public static String toXml(InheritanceType accessType) {
-		return accessType.name();
+	public static String toXml(InheritanceType inheritanceType) {
+		return inheritanceType == null ? null : inheritanceType.name();
 	}
 }

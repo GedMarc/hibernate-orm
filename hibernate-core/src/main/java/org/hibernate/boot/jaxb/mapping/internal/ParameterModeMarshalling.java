@@ -1,24 +1,22 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.boot.jaxb.mapping.internal;
 
-import javax.persistence.ParameterMode;
+import jakarta.persistence.ParameterMode;
 
 /**
- * Marshalling support for dealing with JPA ParameterMode enums.  Plugged into JAXB for binding
+ * JAXB marshalling for {@link ParameterMode}
  *
  * @author Steve Ebersole
  */
 public class ParameterModeMarshalling {
 	public static ParameterMode fromXml(String name) {
-		return ParameterMode.valueOf( name );
+		return name == null ? null : ParameterMode.valueOf( name );
 	}
 
 	public static String toXml(ParameterMode parameterMode) {
-		return parameterMode.name();
+		return parameterMode == null ? null : parameterMode.name();
 	}
 }

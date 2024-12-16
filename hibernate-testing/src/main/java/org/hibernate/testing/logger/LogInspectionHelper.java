@@ -1,14 +1,13 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.testing.logger;
 
 import java.lang.reflect.Field;
 
 import org.hibernate.AssertionFailure;
+
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.DelegatingBasicLogger;
 
@@ -17,18 +16,18 @@ import org.jboss.logging.DelegatingBasicLogger;
  * For this to work, it requires JBoss Logging to pick up our custom
  * implementation {@code Log4DelegatingLogger} via ServiceLoader.
  *
- * @author <a href="mailto:sanne@hibernate.org">Sanne Grinovero</a> (C) 2015 Red Hat Inc.
+ * @author Sanne Grinovero (C) 2015 Red Hat Inc.
  */
-final class LogInspectionHelper {
+public final class LogInspectionHelper {
 
 	private LogInspectionHelper() {
 	}
 
-	static void registerListener(LogListener listener, BasicLogger log) {
+	public static void registerListener(LogListener listener, BasicLogger log) {
 		convertType( log ).registerListener( listener );
 	}
 
-	static void clearAllListeners(BasicLogger log) {
+	public static void clearAllListeners(BasicLogger log) {
 		convertType( log ).clearAllListeners();
 	}
 

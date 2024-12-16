@@ -1,13 +1,17 @@
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * Copyright Red Hat Inc. and Hibernate Authors
+ */
 package org.hibernate.orm.test.mapping.lazytoone.collectioninitializer;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
-import static javax.persistence.CascadeType.ALL;
+import static jakarta.persistence.CascadeType.ALL;
 
 @Entity
 @Table(name = "users")
