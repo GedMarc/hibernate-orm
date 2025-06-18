@@ -10,6 +10,7 @@ plugins {
 
     id "org.hibernate.orm.antlr"
     id "local-xjc-plugin"
+    id("org.moditect.gradleplugin") version "1.0.0-rc3"
 }
 
 description = 'Hibernate\'s core ORM functionality'
@@ -272,3 +273,21 @@ tasks.sourcesJar.dependsOn ':hibernate-core:generateGraphParser'
 tasks.sourcesJar.dependsOn ':hibernate-core:generateHqlParser'
 tasks.sourcesJar.dependsOn ':hibernate-core:generateSqlScriptParser'
 tasks.sourcesJar.dependsOn ':hibernate-core:generateOrderingParser'
+
+moditect {
+
+    addDependenciesModuleInfo {
+        jdepsExtraArgs = ['-q']
+        outputDirectory = file("${buildDir}/modules")
+        overwriteExistingFiles = false
+        modules {
+            module {
+                artifact 'org.hibernate.build:local-build-plugins:1.0.0-SNAPSHOT'
+                moduleInfoFile = file('src/main/moditect/module-info.java')
+            }
+        }
+    }
+}
+
+jar.finalizedBy tasks.addDependenciesModuleInfo
+jar.finalizedBy tasks.publishToMavenLocal
